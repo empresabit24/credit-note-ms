@@ -24,7 +24,7 @@ Esta API contiene todos los endpoints referentes a Notas de Crédito.
 
 1. Descargar el proyecto de gitlab.
 
-```json
+```bash
 > git clone <URL_PROJECT>
 ```
 
@@ -40,3 +40,11 @@ Para poder instalar todas las dependencias.
 ```node
 > npm run start:dev
 ```
+
+## Visualizar documentación en SWAGGER.
+
+En el navegador colocar la dirección sobre la que está levantando el proyecto, en este caso localhost:3000 y añadir “/api”, quedando así: **localhost:3000/api**. Con ello se podrá visualizar todos los endpoints realizados con su respectiva documentación. 
+
+## Visualizar en POSTMAN.
+
+En el cliente postman, podrás ejecutar las pruebas respectivas a la API, bajo sus diferentes endpoints que contiene. En este caso procurar usar localhost:3000 y lo que sigue del resto de la ruta, ya no se debería adicionar “/api”. Ejemplo: **localhost:3000/credit-note**. 
