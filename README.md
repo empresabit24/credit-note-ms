@@ -12,4 +12,12 @@
 
 # API de Notas de Crédito
 
-La API esta desarrollada para poder gestionar todos los endpoints referentes a Notas de Crédito.
+Esta API contiene todos los endpoints referentes a Notas de Crédito.
+
+## Requisitos:
+
+- Node v16.20.0 
+- Sequelize (CLI - v6.6.1, ORM - v6.32.1) 
+- Nestjs v10.1.11 
+- Git (cualquier versión) 
+- Postman (cualquier versión) 
