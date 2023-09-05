@@ -14,14 +14,17 @@ export class CreditNote extends Model<CreditNote> {
   id?: string;
 
   @Column({ allowNull: false })
+  idLocal: string;
+
+  @Column({ allowNull: false })
   series: string;
 
   @Column({ allowNull: false, unique: true })
   correlative: string;
 
   @Column({ allowNull: false })
-  reason: string;
+  currentDocument: string;
 
-  @Column({ allowNull: true })
-  observations: string;
+  @Column({ allowNull: false })
+  type: string;
 }

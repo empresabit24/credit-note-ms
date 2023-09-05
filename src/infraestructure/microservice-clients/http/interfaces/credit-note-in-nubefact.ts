@@ -24,7 +24,7 @@ export interface IItemInNubefact {
   total: number;
   anticipo_regularizacion?: boolean;
   anticipo_documento_serie?: string;
-  anticipo_documento_numero?: number;
+  anticipo_documento_numero?: string;
 }
 
 export class CreditNoteInNubefact {
@@ -42,7 +42,7 @@ export class CreditNoteInNubefact {
   private fecha_de_emision: string;
   private fecha_de_vencimiento?: string;
   private moneda: string;
-  private tipo_de_cambio: string;
+  private tipo_de_cambio?: string;
   private porcentaje_de_igv: number;
   private descuento_global: number;
   private total_descuento: number;
@@ -90,11 +90,13 @@ export class CreditNoteInNubefact {
     denominationClient: string,
     addressClient: string,
     date: string,
-    exchangeRate: string,
     creditNoteType: number,
     documentTypeToChange: number,
     documentCorrelativeToChange: number,
     documentSeriesToChange: string,
+    total: number,
+    totalBase: number,
+    totalIgv: number,
     items: IItemInNubefact[],
   ) {
     this.operacion = 'generar_comprobante';
@@ -107,11 +109,14 @@ export class CreditNoteInNubefact {
     this.cliente_direccion = addressClient;
     this.fecha_de_emision = date;
     this.moneda = '1'; // '1' | S/. PEN -- '2' | $ USD
-    this.tipo_de_cambio = exchangeRate;
+    // this.tipo_de_cambio = exchangeRate;
     this.tipo_de_nota_de_credito = creditNoteType;
     this.documento_que_se_modifica_numero = documentCorrelativeToChange;
     this.documento_que_se_modifica_serie = documentSeriesToChange;
     this.documento_que_se_modifica_tipo = documentTypeToChange;
+    this.total = total;
+    this.total_igv = totalIgv;
+    this.total_gravada = totalBase;
     this.items = items;
   }
 }

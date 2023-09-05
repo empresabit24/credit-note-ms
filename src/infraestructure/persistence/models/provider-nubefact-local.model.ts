@@ -25,4 +25,7 @@ export class FeProviderNubefactLocal extends Model<FeProviderNubefactLocal> {
 
   @Column
   uri: string;
+
+  @Column
+  creditNoteSeries: string;
 }
