@@ -8,8 +8,8 @@ import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [
     ConfigModule.forRoot({
-			isGlobal: true,
-			envFilePath: '.env.local'
+      isGlobal: true,
+      envFilePath: '.env.local',
     }),
     SequelizeModule.forRoot({
       dialect: 'postgres',
@@ -23,11 +23,11 @@ import { ConfigModule } from '@nestjs/config';
       dialectOptions: {
         useUTC: false,
       },
-      timezone: "+00:00",
+      timezone: '+00:00',
     }),
-    UserInterfaceModule, 
-    ApplicationCoreModule, 
-    InfraestructureModule
+    UserInterfaceModule,
+    ApplicationCoreModule,
+    InfraestructureModule,
   ],
 })
 export class AppModule {}

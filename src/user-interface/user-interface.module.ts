@@ -3,8 +3,8 @@ import { ApplicationCoreModule } from '../application-core/application-core.modu
 import { CreditNoteController } from './controllers/credit-note.controller';
 
 @Module({
-    imports: [ApplicationCoreModule],
-	controllers: [CreditNoteController],
-	providers: [],
+  imports: [ApplicationCoreModule],
+  controllers: [CreditNoteController],
+  providers: [],
 })
 export class UserInterfaceModule {}

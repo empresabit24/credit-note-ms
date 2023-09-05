@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config({ path: `../.env.local` });
 
 async function bootstrap() {

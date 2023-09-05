@@ -6,14 +6,13 @@ import { CreateCreditNoteDTO } from '../../application-core/credit-note/dto/crea
 @Controller('credit-note')
 @ApiTags('Credit Note')
 export class CreditNoteController {
+  constructor(private readonly saveCreditNoteUseCase: SaveCreditNoteUseCase) {}
 
-    constructor(private readonly saveCreditNoteUseCase: SaveCreditNoteUseCase) {}
-
-    @Post('')
-    async save(@Body() payload: CreateCreditNoteDTO): Promise<IResponse> {
-        const response = await this.saveCreditNoteUseCase.execute(payload);
-        if (!response.success) throw new HttpException(response, response.httpStatus);
-		return response;
-    }
-
+  @Post('')
+  async save(@Body() payload: CreateCreditNoteDTO): Promise<IResponse> {
+    const response = await this.saveCreditNoteUseCase.execute(payload);
+    if (!response.success)
+      throw new HttpException(response, response.httpStatus);
+    return response;
+  }
 }
