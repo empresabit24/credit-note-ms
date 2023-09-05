@@ -1,7 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { CreditNote } from "../models/credit-note.model";
-import { uuid } from "uuidv4";
 import { CreateCreditNoteDTO } from "../../../application-core/credit-note/dto/create-credit-note.dto";
 
 @Injectable()
