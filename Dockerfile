@@ -1,6 +1,7 @@
 # Building layer
 FROM node:16-alpine as development
-RUN adduser -D -u 1000 -g 1000 ubuntu
+
+RUN addgroup -S bit24group && adduser -S ubuntu -G bit24group
 USER ubuntu
 
 # Optional NPM automation (auth) token build argument
@@ -26,7 +27,8 @@ RUN npm run build
 
 # Runtime (production) layer
 FROM node:16-alpine as production
-RUN adduser -D -u 1000 -g 1000 ubuntu
+
+RUN addgroup -S bit24group && adduser -S ubuntu -G bit24group
 USER ubuntu
 # Optional NPM automation (auth) token build argument
 # ARG NPM_TOKEN
