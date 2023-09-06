@@ -1,5 +1,7 @@
 # Building layer
 FROM node:16-alpine as development
+RUN adduser -D -u 1000 -g 1000 ubuntu
+USER ubuntu
 
 # Optional NPM automation (auth) token build argument
 # ARG NPM_TOKEN
@@ -14,8 +16,6 @@ COPY tsconfig*.json ./
 COPY package*.json ./
 
 # Install dependencies from package-lock.json, see https://docs.npmjs.com/cli/v7/commands/npm-ci
-RUN adduser -D -u 1000 -g 1000 ubuntu
-USER ubuntu
 RUN npm ci
 
 # Copy application sources (.ts, .tsx, js)
@@ -26,7 +26,8 @@ RUN npm run build
 
 # Runtime (production) layer
 FROM node:16-alpine as production
-
+RUN adduser -D -u 1000 -g 1000 ubuntu
+USER ubuntu
 # Optional NPM automation (auth) token build argument
 # ARG NPM_TOKEN
 
@@ -39,8 +40,6 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install runtime dependecies (without dev/test dependecies)
-RUN adduser -D -u 1000 -g 1000 ubuntu
-USER ubuntu
 RUN npm ci --omit=dev
 
 # Copy production build
