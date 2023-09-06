@@ -14,7 +14,7 @@ COPY tsconfig*.json ./
 COPY package*.json ./
 
 # Install dependencies from package-lock.json, see https://docs.npmjs.com/cli/v7/commands/npm-ci
-RUN useradd -D -u 1000 -g 1000 ubuntu
+RUN adduser -D -u 1000 -g 1000 ubuntu
 USER ubuntu
 RUN npm ci
 
@@ -39,7 +39,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install runtime dependecies (without dev/test dependecies)
-RUN useradd -D -u 1000 -g 1000 ubuntu
+RUN adduser -D -u 1000 -g 1000 ubuntu
 USER ubuntu
 RUN npm ci --omit=dev
 
