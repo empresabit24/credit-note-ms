@@ -4,6 +4,6 @@ import { ApplicationCoreModule } from './application-core/application-core.modul
 import { InfraestructureModule } from './infraestructure/infraestructure.module';
 
 @Module({
-  imports: [UserInterfaceModule, ApplicationCoreModule, InfraestructureModule],
+  imports: [InfraestructureModule, ApplicationCoreModule, UserInterfaceModule],
 })
 export class AppModule {}

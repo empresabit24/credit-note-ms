@@ -24,9 +24,7 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: '3GBJHHD5hghtg',
       });
-      request['customerId'] = JSON.parse(
-        base64.decode(payload['ct']),
-      );
+      request['customerId'] = JSON.parse(base64.decode(payload['ct']));
     } catch {
       throw new UnauthorizedException();
     }
@@ -55,7 +53,7 @@ export class AuthGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(request: any): string | undefined {
-    const [type, token] = request[1]?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+    const tokenRequest = request?.find((req: any) => req.includes('Bearer'));
+    return tokenRequest ? tokenRequest.split(' ')[1] : undefined;
   }
 }
