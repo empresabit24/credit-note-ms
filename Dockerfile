@@ -10,6 +10,11 @@ USER ubuntu
 # Optionally authenticate NPM registry
 # RUN npm set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
 
+#DYNAMO DB
+ENV VD_DYNAMODB_REGION="sa-east-1"
+ENV VD_DYNAMODB_ACCESS_KEY="AKIA2ULAP2PR32YB2CJK"
+ENV VD_DYNAMODB_SECRET_ACCESS_KEY="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"
+
 WORKDIR /app
 
 # Copy configuration files
