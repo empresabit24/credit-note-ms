@@ -6,9 +6,9 @@ export class DynamoDbConfig {
 
   async getSettings(customerId: string): Promise<IAccessDataBase> {
     const documentClient = new DynamoDB.DocumentClient({
-      region: process.env.VD_DYNAMODB_REGION,
-      accessKeyId: process.env.VD_DYNAMODB_ACCESS_KEY,
-      secretAccessKey: process.env.VD_DYNAMODB_SECRET_ACCESS_KEY,
+      region: 'sa-east-1',
+      accessKeyId: 'AKIA2ULAP2PR32YB2CJK',
+      secretAccessKey: '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',
     });
     const { Items, Count } = await documentClient
       .query({
