@@ -7,6 +7,7 @@ import {
   ValidateNested,
   IsArray,
   ArrayNotEmpty,
+  IsObject,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -37,6 +38,45 @@ class ItemDTO {
   unitPrice: number;
 }
 
+class ClientDTO {
+  @ApiProperty({ required: true })
+  @IsNumber()
+  @IsNotEmpty()
+  documentType: number;
+
+  @ApiProperty({ required: true })
+  @IsString()
+  @IsNotEmpty()
+  documentNumber: string;
+
+  @ApiProperty({ required: true })
+  @IsString()
+  @IsNotEmpty()
+  denomination: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  address: string;
+}
+
+class DocumentToChangeDTO {
+  @ApiProperty({ required: true })
+  @IsNumber()
+  @IsNotEmpty()
+  typeId: number;
+
+  @ApiProperty({ required: true })
+  @IsString()
+  @IsNotEmpty()
+  series: string;
+
+  @ApiProperty({ required: true })
+  @IsNumber()
+  @IsNotEmpty()
+  correlative: number;
+}
+
 export class CreateCreditNoteDTO {
   @ApiProperty({ required: true })
   @IsString()
@@ -46,42 +86,21 @@ export class CreateCreditNoteDTO {
   @ApiProperty({ required: true })
   @IsNumber()
   @IsNotEmpty()
-  documentTypeClient: number;
-
-  @ApiProperty({ required: true })
-  @IsString()
-  @IsNotEmpty()
-  documentNumberClient: string;
-
-  @ApiProperty({ required: true })
-  @IsString()
-  @IsNotEmpty()
-  denominationClient: string;
-
-  @ApiProperty({ required: false })
-  @IsString()
-  @IsOptional()
-  addressClient: string;
-
-  @ApiProperty({ required: true })
-  @IsNumber()
-  @IsNotEmpty()
   creditNoteType: number;
 
   @ApiProperty({ required: true })
-  @IsNumber()
+  @IsObject()
   @IsNotEmpty()
-  documentCorrelativeToChange: number;
+  @ValidateNested({ each: true })
+  @Type(() => DocumentToChangeDTO)
+  documentToChange: DocumentToChangeDTO;
 
   @ApiProperty({ required: true })
-  @IsString()
+  @IsObject()
   @IsNotEmpty()
-  documentSeriesToChange: string;
-
-  @ApiProperty({ required: true })
-  @IsNumber()
-  @IsNotEmpty()
-  documentTypeToChange: number;
+  @ValidateNested({ each: true })
+  @Type(() => ClientDTO)
+  client: ClientDTO;
 
   @ApiProperty({ required: true })
   @IsArray()

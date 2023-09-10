@@ -1,16 +1,15 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreditNoteService } from '../../../infraestructure/persistence/services/credit-note.service';
 import { CreateCreditNoteDTO } from '../dto/create-credit-note.dto';
 import { FeProviderNubefactLocalService } from '../../../infraestructure/persistence/services/fe-provider-nubefact-local.service';
 import { NubefactClient } from '../../../infraestructure/microservice-clients/http/nubefact.client';
-import {
-  CreditNoteInNubefact,
-  IItemInNubefact,
-} from 'src/infraestructure/microservice-clients/http/interfaces/credit-note-in-nubefact';
+import { CreditNoteInNubefact } from 'src/infraestructure/microservice-clients/http/interfaces/credit-note-in-nubefact';
 import * as moment from 'moment';
 
 @Injectable()
 export class SaveCreditNoteUseCase {
+  private logger = new Logger(SaveCreditNoteUseCase.name);
+
   constructor(
     private readonly creditNoteService: CreditNoteService,
     private readonly feProviderNubefactLocalService: FeProviderNubefactLocalService,
@@ -18,63 +17,68 @@ export class SaveCreditNoteUseCase {
   ) {}
   async execute(data: CreateCreditNoteDTO) {
     try {
+      this.logger.log(
+        'Busca el proveedor para nubefact por idlocal: ' + data.idLocal,
+      );
       const providerNubefactLocalResponse =
         await this.feProviderNubefactLocalService.findByLocal(data.idLocal);
 
+      this.logger.log('Obtiene el correlativo para la nota de crédito');
       const correlative = await this.getCorrelative();
 
-      const date = moment().format('DD-MM-YYYY');
+      this.logger.log('Obtiene los items mapeados');
       const { items, sumTotal, sumTotalBase, sumTotalIgv } =
         this.getMappedItemsAndTotals(data.items);
 
+      const date = moment().format('DD-MM-YYYY');
+
       const currentDocument = {
         items,
-        document: {
-          typeId: data.documentTypeToChange,
-          series: data.documentSeriesToChange,
-          correlative: data.documentCorrelativeToChange,
-        },
-        client: {
-          documentType: data.documentTypeClient,
-          documentNumber: data.documentNumberClient,
-          denomination: data.denominationClient,
-          address: data.addressClient,
-        },
+        documentToChange: data.documentToChange,
+        client: data.client,
       };
 
       const type = {
         typeId: data.creditNoteType,
       };
 
-      // save in bbdd
+      const currentSeries = currentDocument.documentToChange.series.includes(
+        'F',
+      )
+        ? providerNubefactLocalResponse.creditNoteSeriesToFactura
+        : providerNubefactLocalResponse.creditNoteSeriesToBoleta;
+
+      this.logger.log('Guarda en bbdd la nota de crédito');
       await this.creditNoteService.create({
         idLocal: String(data.idLocal),
-        series: providerNubefactLocalResponse.creditNoteSeries,
+        series: currentSeries,
         correlative,
         currentDocument: JSON.stringify(currentDocument),
         type: JSON.stringify(type),
       });
 
-      // create nubefact object
+      this.logger.log(
+        'Construye el payload para nubefact de la nota de crédito',
+      );
       const creditNoteInNubefactPayload = new CreditNoteInNubefact(
-        providerNubefactLocalResponse.creditNoteSeries,
+        currentSeries,
         Number(correlative),
-        Number(data.documentTypeClient),
-        data.documentNumberClient,
-        data.denominationClient,
-        data.addressClient,
+        Number(data.client.documentType),
+        data.client.documentNumber,
+        data.client.denomination,
+        data.client.address,
         date,
         Number(data.creditNoteType),
-        data.documentTypeToChange,
-        data.documentCorrelativeToChange,
-        data.documentSeriesToChange,
+        data.documentToChange.typeId,
+        data.documentToChange.correlative,
+        data.documentToChange.series,
         sumTotal,
         sumTotalBase,
         sumTotalIgv,
         items,
       );
 
-      // save in nubefact
+      this.logger.log('Guarda en nubefact la nota de crédito');
       const nubefactClientResponse =
         await this.nubefactClient.generateCreditNote(
           providerNubefactLocalResponse.uri,
@@ -82,6 +86,7 @@ export class SaveCreditNoteUseCase {
           creditNoteInNubefactPayload,
         );
 
+      this.logger.log('Creó con éxito la nota de crédito');
       return {
         success: true,
         message: 'Save a new credit note successfully!',
@@ -89,6 +94,7 @@ export class SaveCreditNoteUseCase {
         httpStatus: HttpStatus.OK,
       };
     } catch (error) {
+      this.logger.error('Sucedió un error');
       return {
         success: false,
         message: 'Error to create a new credit note!',
@@ -99,13 +105,20 @@ export class SaveCreditNoteUseCase {
     }
   }
 
-  async getCorrelative() {
+  getSeries() {}
+
+  async getCorrelative(): Promise<string> {
     const creditNotesResponse = await this.creditNoteService.getLast();
     if (creditNotesResponse.length === 0) return String(1);
     return String(Number(creditNotesResponse[0].correlative) + 1);
   }
 
-  getMappedItemsAndTotals(items: any[]) {
+  getMappedItemsAndTotals(items: any[]): {
+    items: any[];
+    sumTotal: number;
+    sumTotalBase: number;
+    sumTotalIgv: number;
+  } {
     let sumTotal = 0;
     let sumTotalBase = 0;
     let sumTotalIgv = 0;

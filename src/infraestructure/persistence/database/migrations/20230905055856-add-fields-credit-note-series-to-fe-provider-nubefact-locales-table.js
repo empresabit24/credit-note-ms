@@ -9,17 +9,23 @@ module.exports = {
      * Example:
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
-    return queryInterface.addColumn(
-      {
-        tableName: 'fe_provider_nubefact_locales',
-        schema: 'sch_main',
-      },
-      'creditNoteSeries',
-      {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
-    );
+    const columns = ['creditNoteSeriesToFactura', 'creditNoteSeriesToBoleta'];
+
+    columns.forEach(async (column) => {
+      await queryInterface.addColumn(
+        {
+          tableName: 'fe_provider_nubefact_locales',
+          schema: 'sch_main',
+        },
+        column,
+        {
+          type: Sequelize.STRING,
+          allowNull: true,
+        },
+      );
+    });
+
+    return true;
   },
 
   async down() {
