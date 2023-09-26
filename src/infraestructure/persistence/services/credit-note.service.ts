@@ -26,4 +26,10 @@ export class CreditNoteService {
       order: [['createdAt', 'DESC']],
     });
   }
+
+  async getAll(): Promise<CreditNote[]> {
+    return this.creditNoteModel.findAll({
+      order: [['createdAt', 'DESC']],
+    });
+  }
 }
