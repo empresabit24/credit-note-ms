@@ -75,6 +75,17 @@ class DocumentToChangeDTO {
   @IsNumber()
   @IsNotEmpty()
   correlative: number;
+
+  @ApiProperty({ required: true })
+  @IsNumber()
+  @IsNotEmpty()
+  tipo_cambio: number;
+
+  @ApiProperty({ required: true })
+  @IsNumber()
+  @IsNotEmpty()
+  moneda: number;
+
 }
 
 export class CreateCreditNoteDTO {

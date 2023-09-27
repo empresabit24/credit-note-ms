@@ -16,6 +16,8 @@ export class CreditNoteService {
     correlative: string;
     currentDocument: string;
     type: string;
+    tipo_cambio: number;
+    // enlace_del_pdf:string;
   }): Promise<CreditNote> {
     return this.creditNoteModel.create(creditNote);
   }

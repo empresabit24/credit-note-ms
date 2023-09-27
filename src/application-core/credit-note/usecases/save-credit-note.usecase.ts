@@ -16,6 +16,7 @@ export class SaveCreditNoteUseCase {
     private readonly nubefactClient: NubefactClient,
   ) {}
   async execute(data: CreateCreditNoteDTO) {
+    this.logger.log(data);
     try {
       this.logger.log(
         'Busca el proveedor para nubefact por idlocal: ' + data.idLocal,
@@ -26,9 +27,16 @@ export class SaveCreditNoteUseCase {
       this.logger.log('Obtiene el correlativo para la nota de crédito');
       const correlative = await this.getCorrelative();
 
+      const tipo_cambio = data.documentToChange.tipo_cambio;
+      this.logger.log('Obtiene el tipo de cambio' + tipo_cambio);
+
+      const moneda = data.documentToChange.moneda;
+      this.logger.log('Obtiene la moneda' + moneda);
+
+
       this.logger.log('Obtiene los items mapeados');
       const { items, sumTotal, sumTotalBase, sumTotalIgv } =
-        this.getMappedItemsAndTotals(data.items);
+        this.getMappedItemsAndTotals(data.items, tipo_cambio);
 
       const date = moment().format('DD-MM-YYYY');
 
@@ -55,6 +63,8 @@ export class SaveCreditNoteUseCase {
         correlative,
         currentDocument: JSON.stringify(currentDocument),
         type: JSON.stringify(type),
+        tipo_cambio,
+        //enlace_del_pdf,
       });
 
       this.logger.log(
@@ -72,11 +82,14 @@ export class SaveCreditNoteUseCase {
         data.documentToChange.typeId,
         data.documentToChange.correlative,
         data.documentToChange.series,
+        moneda,
+        tipo_cambio,
         sumTotal,
         sumTotalBase,
         sumTotalIgv,
         items,
       );
+      this.logger.log(JSON.stringify(creditNoteInNubefactPayload, null, 2));
 
       this.logger.log('Guarda en nubefact la nota de crédito');
       const nubefactClientResponse =
@@ -113,7 +126,7 @@ export class SaveCreditNoteUseCase {
     return String(Number(creditNotesResponse[0].correlative) + 1);
   }
 
-  getMappedItemsAndTotals(items: any[]): {
+  getMappedItemsAndTotals(items: any[], exchangeRate:number): {
     items: any[];
     sumTotal: number;
     sumTotalBase: number;
@@ -123,13 +136,13 @@ export class SaveCreditNoteUseCase {
     let sumTotalBase = 0;
     let sumTotalIgv = 0;
 
-    const currentItems = items.map((item) => {
-      const unitValue = parseFloat((item.unitPrice / 1.18).toFixed(10));
+    const currentItems = items.map((item) => {  // TOTAL 4700
+      const unitValue = parseFloat(((item.unitPrice / 1.18)/exchangeRate).toFixed(10)); // UNIT 3983.05
       const igvTotal = parseFloat(
-        ((item.unitPrice - unitValue) * item.quantity).toFixed(10),
+        ((item.unitPrice/exchangeRate - unitValue) * item.quantity).toFixed(10),   // IGV 716,95
       );
       const subTotal = parseFloat((unitValue * item.quantity).toFixed(10));
-      const total = parseFloat((item.unitPrice * item.quantity).toFixed(10));
+      const total = parseFloat(((item.unitPrice/exchangeRate) * item.quantity).toFixed(10));
 
       sumTotal += total;
       sumTotalBase += subTotal;
@@ -142,7 +155,7 @@ export class SaveCreditNoteUseCase {
         descripcion: item.description,
         tipo_de_igv: 1, // Gravado - Operación Onerosa
         valor_unitario: unitValue,
-        precio_unitario: item.unitPrice,
+        precio_unitario: item.unitPrice / exchangeRate,
         igv: igvTotal,
         subtotal: subTotal,
         total,
