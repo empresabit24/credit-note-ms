@@ -41,8 +41,8 @@ export class CreditNoteInNubefact {
   private cliente_email_2?: string;
   private fecha_de_emision: string;
   private fecha_de_vencimiento?: string;
-  private moneda: string;
-  private tipo_de_cambio?: string;
+  private moneda: number;
+  private tipo_de_cambio?: number;
   private porcentaje_de_igv: number;
   private descuento_global: number;
   private total_descuento: number;
@@ -94,6 +94,8 @@ export class CreditNoteInNubefact {
     documentTypeToChange: number,
     documentCorrelativeToChange: number,
     documentSeriesToChange: string,
+    moneda: number,
+    tipo_cambio: number,
     total: number,
     totalBase: number,
     totalIgv: number,
@@ -108,8 +110,8 @@ export class CreditNoteInNubefact {
     this.cliente_denominacion = denominationClient;
     this.cliente_direccion = addressClient;
     this.fecha_de_emision = date;
-    this.moneda = '1'; // '1' | S/. PEN -- '2' | $ USD
-    // this.tipo_de_cambio = exchangeRate;
+    this.moneda = moneda; // '1' | S/. PEN -- '2' | $ USD
+    this.tipo_de_cambio = tipo_cambio;
     this.tipo_de_nota_de_credito = creditNoteType;
     this.documento_que_se_modifica_numero = documentCorrelativeToChange;
     this.documento_que_se_modifica_serie = documentSeriesToChange;
@@ -118,5 +120,6 @@ export class CreditNoteInNubefact {
     this.total_igv = totalIgv;
     this.total_gravada = totalBase;
     this.items = items;
+    this.formato_de_pdf = 'A4';
   }
 }
