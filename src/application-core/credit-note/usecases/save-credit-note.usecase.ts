@@ -33,7 +33,6 @@ export class SaveCreditNoteUseCase {
       const moneda = data.documentToChange.moneda;
       this.logger.log('Obtiene la moneda' + moneda);
 
-
       this.logger.log('Obtiene los items mapeados');
       const { items, sumTotal, sumTotalBase, sumTotalIgv } =
         this.getMappedItemsAndTotals(data.items, tipo_cambio);
@@ -57,14 +56,13 @@ export class SaveCreditNoteUseCase {
         : providerNubefactLocalResponse.creditNoteSeriesToBoleta;
 
       this.logger.log('Guarda en bbdd la nota de crédito');
-      await this.creditNoteService.create({
+      const createCreditNote = await this.creditNoteService.create({
         idLocal: String(data.idLocal),
         series: currentSeries,
         correlative,
         currentDocument: JSON.stringify(currentDocument),
         type: JSON.stringify(type),
         tipo_cambio,
-        //enlace_del_pdf,
       });
 
       this.logger.log(
@@ -99,6 +97,13 @@ export class SaveCreditNoteUseCase {
           creditNoteInNubefactPayload,
         );
 
+      console.log(createCreditNote, nubefactClientResponse);
+
+      await this.creditNoteService.updateLinkPdfById(
+        nubefactClientResponse.data.enlace_del_pdf,
+        createCreditNote?.dataValues?.id,
+      );
+
       this.logger.log('Creó con éxito la nota de crédito');
       return {
         success: true,
@@ -118,15 +123,16 @@ export class SaveCreditNoteUseCase {
     }
   }
 
-  getSeries() {}
-
   async getCorrelative(): Promise<string> {
     const creditNotesResponse = await this.creditNoteService.getLast();
     if (creditNotesResponse.length === 0) return String(1);
     return String(Number(creditNotesResponse[0].correlative) + 1);
   }
 
-  getMappedItemsAndTotals(items: any[], exchangeRate:number): {
+  getMappedItemsAndTotals(
+    items: any[],
+    exchangeRate: number,
+  ): {
     items: any[];
     sumTotal: number;
     sumTotalBase: number;
@@ -136,13 +142,20 @@ export class SaveCreditNoteUseCase {
     let sumTotalBase = 0;
     let sumTotalIgv = 0;
 
-    const currentItems = items.map((item) => {  // TOTAL 4700
-      const unitValue = parseFloat(((item.unitPrice / 1.18)/exchangeRate).toFixed(10)); // UNIT 3983.05
+    const currentItems = items.map((item) => {
+      // TOTAL 4700
+      const unitValue = parseFloat(
+        (item.unitPrice / 1.18 / exchangeRate).toFixed(10),
+      ); // UNIT 3983.05
       const igvTotal = parseFloat(
-        ((item.unitPrice/exchangeRate - unitValue) * item.quantity).toFixed(10),   // IGV 716,95
+        ((item.unitPrice / exchangeRate - unitValue) * item.quantity).toFixed(
+          10,
+        ), // IGV 716,95
       );
       const subTotal = parseFloat((unitValue * item.quantity).toFixed(10));
-      const total = parseFloat(((item.unitPrice/exchangeRate) * item.quantity).toFixed(10));
+      const total = parseFloat(
+        ((item.unitPrice / exchangeRate) * item.quantity).toFixed(10),
+      );
 
       sumTotal += total;
       sumTotalBase += subTotal;

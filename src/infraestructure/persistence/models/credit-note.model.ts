@@ -28,10 +28,9 @@ export class CreditNote extends Model<CreditNote> {
   @Column({ allowNull: false })
   type: string;
 
-  /*@Column({allowNull:false})
-  enlace_del_pdf: string;*/
+  @Column({ allowNull: true })
+  linkPdf: string;
 
-  @Column({allowNull:false})
+  @Column({ allowNull: false })
   tipo_cambio: number;
-
 }

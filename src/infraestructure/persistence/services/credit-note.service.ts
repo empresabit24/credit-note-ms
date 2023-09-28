@@ -17,9 +17,13 @@ export class CreditNoteService {
     currentDocument: string;
     type: string;
     tipo_cambio: number;
-    // enlace_del_pdf:string;
+    linkPdf?: string;
   }): Promise<CreditNote> {
     return this.creditNoteModel.create(creditNote);
+  }
+
+  async updateLinkPdfById(linkPdf: string, id: string): Promise<any> {
+    return this.creditNoteModel.update({ linkPdf }, { where: { id } });
   }
 
   async getLast(): Promise<CreditNote[]> {
