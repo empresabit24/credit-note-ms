@@ -28,7 +28,7 @@ export class SaveCreditNoteUseCase {
       const correlative = await this.getCorrelative();
 
       const tipo_cambio = data.documentToChange.tipo_cambio;
-      this.logger.log('Obtiene el tipo de cambio' + tipo_cambio);
+      this.logger.log('Obtiene el tipo de cambio ' + tipo_cambio);
 
       const moneda = data.documentToChange.moneda;
       this.logger.log('Obtiene la moneda' + moneda);
@@ -37,7 +37,7 @@ export class SaveCreditNoteUseCase {
       const { items, sumTotal, sumTotalBase, sumTotalIgv } =
         this.getMappedItemsAndTotals(data.items, tipo_cambio);
 
-      const date = moment().format('DD-MM-YYYY');
+      const date = moment().utcOffset(-5).format('DD-MM-YYYY');
 
       const currentDocument = {
         items,
