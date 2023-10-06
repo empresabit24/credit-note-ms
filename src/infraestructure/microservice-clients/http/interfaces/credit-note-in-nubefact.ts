@@ -32,6 +32,7 @@ export class CreditNoteInNubefact {
   private tipo_de_comprobante: number;
   private serie: string;
   private numero: number;
+  private sunat_transaction: number;
   private cliente_tipo_de_documento: number;
   private cliente_numero_de_documento: string;
   private cliente_denominacion: string;
@@ -103,6 +104,7 @@ export class CreditNoteInNubefact {
   ) {
     this.operacion = 'generar_comprobante';
     this.tipo_de_comprobante = 3; // 3 | Is the number for credit note
+    this.sunat_transaction = 1; // 1 | Venta Interna
     this.serie = series;
     this.numero = correlative;
     this.cliente_tipo_de_documento = documentTypeClient;
