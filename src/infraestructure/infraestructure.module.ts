@@ -8,6 +8,8 @@ import { SequelizeConfigService } from './persistence/services/sequelize-config.
 import { FeProviderNubefactLocalService } from './persistence/services/fe-provider-nubefact-local.service';
 import { FeProviderNubefactLocal } from './persistence/models/provider-nubefact-local.model';
 import { NubefactClient } from './microservice-clients/http/nubefact.client';
+import { ParameterService } from './persistence/services/parameter.service';
+import { Parameter } from './persistence/models/parameter.model';
 
 @Module({
   imports: [
@@ -24,13 +26,23 @@ import { NubefactClient } from './microservice-clients/http/nubefact.client';
       inject: [ConfigService],
       useClass: SequelizeConfigService,
     }),
-    SequelizeModule.forFeature([CreditNote, FeProviderNubefactLocal]),
+    SequelizeModule.forFeature([
+      CreditNote,
+      FeProviderNubefactLocal,
+      Parameter,
+    ]),
   ],
   providers: [
     CreditNoteService,
     FeProviderNubefactLocalService,
+    ParameterService,
     NubefactClient,
   ],
-  exports: [CreditNoteService, FeProviderNubefactLocalService, NubefactClient],
+  exports: [
+    CreditNoteService,
+    FeProviderNubefactLocalService,
+    ParameterService,
+    NubefactClient,
+  ],
 })
 export class InfraestructureModule {}

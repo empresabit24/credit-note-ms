@@ -1,10 +1,13 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreditNoteService } from '../../../infraestructure/persistence/services/credit-note.service';
 import { CreateCreditNoteDTO } from '../dto/create-credit-note.dto';
 import { FeProviderNubefactLocalService } from '../../../infraestructure/persistence/services/fe-provider-nubefact-local.service';
 import { NubefactClient } from '../../../infraestructure/microservice-clients/http/nubefact.client';
-import { CreditNoteInNubefact } from 'src/infraestructure/microservice-clients/http/interfaces/credit-note-in-nubefact';
+import { CreditNoteInNubefact } from '../../../infraestructure/microservice-clients/http/interfaces/credit-note-in-nubefact';
 import * as moment from 'moment';
+import { ParameterService } from '../../../infraestructure/persistence/services/parameter.service';
+require('dotenv').config({ path: '.env.local' });
 
 @Injectable()
 export class SaveCreditNoteUseCase {
@@ -13,11 +16,24 @@ export class SaveCreditNoteUseCase {
   constructor(
     private readonly creditNoteService: CreditNoteService,
     private readonly feProviderNubefactLocalService: FeProviderNubefactLocalService,
+    private readonly parameterService: ParameterService,
     private readonly nubefactClient: NubefactClient,
   ) {}
   async execute(data: CreateCreditNoteDTO) {
-    this.logger.log(data);
     try {
+      const limitDays = await this.parameterService.findByName(
+        process.env.VARIABLE_NAME_CREDIT_NOTE_LIMIT,
+      );
+      const start = moment(data.documentToChange.dateOfIssue, 'YYYY-MM-DD');
+      const end = moment().format('YYYY-MM-DD');
+
+      const days = moment.duration(start.diff(end)).asDays() * -1;
+
+      if (Number(days) > Number(limitDays.valor))
+        throw new Error(
+          'Ha excedido los días límite permitidos para crear la Nota de Crédito.',
+        );
+
       this.logger.log(
         'Busca el proveedor para nubefact por idlocal: ' + data.idLocal,
       );
@@ -27,15 +43,15 @@ export class SaveCreditNoteUseCase {
       this.logger.log('Obtiene el correlativo para la nota de crédito');
       const correlative = await this.getCorrelative();
 
-      const tipo_cambio = data.documentToChange.tipo_cambio;
-      this.logger.log('Obtiene el tipo de cambio ' + tipo_cambio);
+      const exchangeRate = data.documentToChange.exchangeRate;
+      this.logger.log('Obtiene el tipo de cambio ' + exchangeRate);
 
-      const moneda = data.documentToChange.moneda;
-      this.logger.log('Obtiene la moneda' + moneda);
+      const currency = data.documentToChange.currency;
+      this.logger.log('Obtiene la moneda' + currency);
 
       this.logger.log('Obtiene los items mapeados');
       const { items, sumTotal, sumTotalBase, sumTotalIgv } =
-        this.getMappedItemsAndTotals(data.items, tipo_cambio);
+        this.getMappedItemsAndTotals(data.items, exchangeRate);
 
       const date = moment().utcOffset(-5).format('DD-MM-YYYY');
 
@@ -62,7 +78,7 @@ export class SaveCreditNoteUseCase {
         correlative,
         currentDocument: JSON.stringify(currentDocument),
         type: JSON.stringify(type),
-        tipo_cambio,
+        tipo_cambio: exchangeRate,
       });
 
       this.logger.log(
@@ -80,8 +96,8 @@ export class SaveCreditNoteUseCase {
         data.documentToChange.typeId,
         data.documentToChange.correlative,
         data.documentToChange.series,
-        moneda,
-        tipo_cambio,
+        currency,
+        exchangeRate,
         sumTotal,
         sumTotalBase,
         sumTotalIgv,
@@ -96,8 +112,6 @@ export class SaveCreditNoteUseCase {
           providerNubefactLocalResponse.token,
           creditNoteInNubefactPayload,
         );
-
-      console.log(createCreditNote, nubefactClientResponse);
 
       await this.creditNoteService.updateLinkPdfById(
         nubefactClientResponse.data.enlace_del_pdf,
@@ -115,7 +129,7 @@ export class SaveCreditNoteUseCase {
       this.logger.error('Sucedió un error');
       return {
         success: false,
-        message: 'Error to create a new credit note!',
+        message: error?.message || 'Error to create a new credit note!',
         code: error.response?.data?.codigo || error.code,
         response: error.response?.data?.errors || error,
         httpStatus: HttpStatus.BAD_REQUEST,
