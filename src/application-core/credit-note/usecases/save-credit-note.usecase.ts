@@ -7,6 +7,7 @@ import { NubefactClient } from '../../../infraestructure/microservice-clients/ht
 import { CreditNoteInNubefact } from '../../../infraestructure/microservice-clients/http/interfaces/credit-note-in-nubefact';
 import * as moment from 'moment';
 import { ParameterService } from '../../../infraestructure/persistence/services/parameter.service';
+import { ResetStockItemsCreditNoteUseCase } from '../usecases/reset-stock-items-credit-note.usecase';
 require('dotenv').config({ path: '.env.local' });
 
 @Injectable()
@@ -18,6 +19,7 @@ export class SaveCreditNoteUseCase {
     private readonly feProviderNubefactLocalService: FeProviderNubefactLocalService,
     private readonly parameterService: ParameterService,
     private readonly nubefactClient: NubefactClient,
+    private readonly resetStockItemsCreditNoteUseCase: ResetStockItemsCreditNoteUseCase,
   ) {}
   async execute(data: CreateCreditNoteDTO) {
     try {
@@ -117,6 +119,19 @@ export class SaveCreditNoteUseCase {
         nubefactClientResponse.data.enlace_del_pdf,
         createCreditNote?.dataValues?.id,
       );
+
+      this.logger.log('Resetea stocks de los items');
+      for await (const item of data.items) {
+        try {
+          await this.resetStockItemsCreditNoteUseCase.execute(
+            Number(data.idLocal),
+            Number(item.code),
+            item.quantity,
+          );
+        } catch (error) {
+          console.log(error);
+        }
+      }
 
       this.logger.log('Creó con éxito la nota de crédito');
       return {

@@ -10,6 +10,12 @@ import { FeProviderNubefactLocal } from './persistence/models/provider-nubefact-
 import { NubefactClient } from './microservice-clients/http/nubefact.client';
 import { ParameterService } from './persistence/services/parameter.service';
 import { Parameter } from './persistence/models/parameter.model';
+import { ProductLocalService } from './persistence/services/product-local.service';
+import { ProductLocal } from './persistence/models/product-local.model';
+import { StockProductLocalService } from './persistence/services/stock-product-local.service';
+import { StockProductLocal } from './persistence/models/stock-product-local.model';
+import { StoreService } from './persistence/services/store.service';
+import { Store } from './persistence/models/store.model';
 
 @Module({
   imports: [
@@ -30,18 +36,27 @@ import { Parameter } from './persistence/models/parameter.model';
       CreditNote,
       FeProviderNubefactLocal,
       Parameter,
+      ProductLocal,
+      StockProductLocal,
+      Store,
     ]),
   ],
   providers: [
     CreditNoteService,
     FeProviderNubefactLocalService,
     ParameterService,
+    ProductLocalService,
+    StockProductLocalService,
+    StoreService,
     NubefactClient,
   ],
   exports: [
     CreditNoteService,
     FeProviderNubefactLocalService,
     ParameterService,
+    ProductLocalService,
+    StockProductLocalService,
+    StoreService,
     NubefactClient,
   ],
 })
