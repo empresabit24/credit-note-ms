@@ -191,7 +191,7 @@ export class SaveCreditNoteUseCase {
         cantidad: item.quantity,
         descripcion: item.description,
         tipo_de_igv: item.afectacion_igv === 1 ? 1 : (item.afectacion_igv === 2 ? 8 : 9) , // 1 = Gravado - Operación Onerosa | 8 = Exonerado - Operación Onerosa | 9 = Inafecto - Operación Onerosa
-        valor_unitario: item.afectacion_igv === 1 ? unitValue : item.unitPrice,
+        valor_unitario: item.afectacion_igv === 1 ? unitValue : item.unitPrice / exchangeRate,
         precio_unitario: item.unitPrice / exchangeRate,
         igv: item.afectacion_igv === 1 ? sumTotalIgv : 0,
         subtotal: item.afectacion_igv === 1 ? sumTotalBase : item.unitPrice / exchangeRate,
