@@ -12,7 +12,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Credit Notes')
     .setDescription('API Rest related to manage credit note.')
-    .setVersion('1.0.3')
+    .setVersion('1.0.4')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

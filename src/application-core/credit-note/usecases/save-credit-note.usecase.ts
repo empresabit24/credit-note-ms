@@ -194,7 +194,7 @@ export class SaveCreditNoteUseCase {
         valor_unitario: item.afectacion_igv === 1 ? unitValue : item.unitPrice / exchangeRate,
         precio_unitario: item.unitPrice / exchangeRate,
         igv: item.afectacion_igv === 1 ? sumTotalIgv : 0,
-        subtotal: item.afectacion_igv === 1 ? sumTotalBase : item.unitPrice / exchangeRate,
+        subtotal: item.afectacion_igv === 1 ? sumTotalBase : (item.unitPrice / exchangeRate)*item.quantity,
         total,
       };
     });
