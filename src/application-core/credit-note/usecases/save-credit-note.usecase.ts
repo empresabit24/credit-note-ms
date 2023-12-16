@@ -151,7 +151,7 @@ export class SaveCreditNoteUseCase {
     const currentItems = items.map((item) => {
       // TOTAL 100
       const unitValue = parseFloat(
-        (item.unitPrice / 1.18 / exchangeRate).toFixed(10),
+        ((item.unitPrice / 1.18) / exchangeRate).toFixed(10),
       );
 
       // Check if item is affected by IGV
@@ -193,8 +193,8 @@ export class SaveCreditNoteUseCase {
         tipo_de_igv: item.afectacion_igv === 1 ? 1 : (item.afectacion_igv === 2 ? 8 : 9) , // 1 = Gravado - Operación Onerosa | 8 = Exonerado - Operación Onerosa | 9 = Inafecto - Operación Onerosa
         valor_unitario: item.afectacion_igv === 1 ? unitValue : item.unitPrice / exchangeRate,
         precio_unitario: item.unitPrice / exchangeRate,
-        igv: item.afectacion_igv === 1 ? sumTotalIgv : 0,
-        subtotal: item.afectacion_igv === 1 ? sumTotalBase : (item.unitPrice / exchangeRate)*item.quantity,
+        igv: item.afectacion_igv === 1 ? (item.unitPrice / exchangeRate - unitValue) * item.quantity : 0,
+        subtotal: item.afectacion_igv === 1 ? (unitValue * item.quantity) : (item.unitPrice / exchangeRate)*item.quantity,
         total,
       };
     });
