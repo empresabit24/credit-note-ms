@@ -36,6 +36,11 @@ class ItemDTO {
   @IsNumber()
   @IsNotEmpty()
   unitPrice: number;
+
+  @ApiProperty({ required: true })
+  @IsNumber()
+  @IsNotEmpty()
+  afectacion_igv: number;
 }
 
 class ClientDTO {

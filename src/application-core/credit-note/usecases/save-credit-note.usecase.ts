@@ -143,6 +143,7 @@ export class SaveCreditNoteUseCase {
       };
     } catch (error) {
       this.logger.error('Sucedió un error');
+      this.logger.error(error)
       return {
         success: false,
         message: error?.message || 'Error to create a new credit note!',
@@ -215,7 +216,7 @@ export class SaveCreditNoteUseCase {
 
       return {
         unidad_de_medida: item.unit,
-        codigo: item.code,
+        codigo: item.sku,
         cantidad: item.quantity,
         descripcion: item.description,
         tipo_de_igv: item.afectacion_igv === 1 ? 1 : (item.afectacion_igv === 2 ? 8 : 9) , // 1 = Gravado - Operación Onerosa | 8 = Exonerado - Operación Onerosa | 9 = Inafecto - Operación Onerosa
