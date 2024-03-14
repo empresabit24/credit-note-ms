@@ -1,49 +1,23 @@
-# Building layer
-FROM node:16-alpine as development
-
-# Optional NPM automation (auth) token build argument
-# ARG NPM_TOKEN
-
-# Optionally authenticate NPM registry
-# RUN npm set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
-
-WORKDIR /app
-
-# Copy configuration files
-COPY tsconfig*.json ./
-COPY package*.json ./
-
-# Install dependencies from package-lock.json, see https://docs.npmjs.com/cli/v7/commands/npm-ci
-RUN npm i
-
-# Copy application sources (.ts, .tsx, js)
-COPY src/ src/
-
-# Build application (produces dist/ folder)
-RUN npm run build
-
-# Runtime (production) layer
+# Utilizar node:alpine como imagen base
 FROM node:16-alpine as production
 
-# Optional NPM automation (auth) token build argument
-# ARG NPM_TOKEN
-
-# Optionally authenticate NPM registry
-# RUN npm set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
-
+# Establecer el directorio de trabajo
 WORKDIR /app
 
-# Copy dependencies files
+# Copiar archivos de dependencias
 COPY package*.json ./
 
-# Install runtime dependecies (without dev/test dependecies)
-RUN npm i --omit=dev
+# Instalar dependencias de producción
+RUN npm install
 
-# Copy production build
-COPY --from=development /app/dist/ ./dist/
+# Copiar el código fuente
+COPY . .
 
-# Expose application port
+# Crear el build de producción
+RUN npm run build
+
+# Exponer el puerto de la aplicación
 EXPOSE 3000
 
-# Start application
+# Ejecutar la aplicación
 CMD [ "node", "dist/main.js" ]
