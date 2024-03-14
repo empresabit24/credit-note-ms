@@ -34,7 +34,7 @@ export class SaveCreditNoteUseCase {
       this.logger.log('Obtiene la moneda' + moneda);
 
       this.logger.log('Obtiene los items mapeados');
-      const { items, sumTotal, sumTotalBase, sumTotalIgv } =
+      const { items, sumTotal, sumTotalBase, sumTotalIgv, sumTotalExonerada, sumTotalInafecta } =
         this.getMappedItemsAndTotals(data.items, tipo_cambio);
 
       const date = moment().utcOffset(-5).format('DD-MM-YYYY');
@@ -85,6 +85,8 @@ export class SaveCreditNoteUseCase {
         sumTotal,
         sumTotalBase,
         sumTotalIgv,
+        sumTotalExonerada,
+        sumTotalInafecta,
         items,
       );
       this.logger.log(JSON.stringify(creditNoteInNubefactPayload, null, 2));
@@ -137,40 +139,62 @@ export class SaveCreditNoteUseCase {
     sumTotal: number;
     sumTotalBase: number;
     sumTotalIgv: number;
+    sumTotalExonerada: number;
+    sumTotalInafecta: number;
   } {
     let sumTotal = 0;
     let sumTotalBase = 0;
     let sumTotalIgv = 0;
+    let sumTotalExonerada = 0;
+    let sumTotalInafecta = 0;
 
     const currentItems = items.map((item) => {
-      // TOTAL 4700
+      // TOTAL 100
       const unitValue = parseFloat(
-        (item.unitPrice / 1.18 / exchangeRate).toFixed(10),
-      ); // UNIT 3983.05
-      const igvTotal = parseFloat(
-        ((item.unitPrice / exchangeRate - unitValue) * item.quantity).toFixed(
-          10,
-        ), // IGV 716,95
+        ((item.unitPrice / 1.18) / exchangeRate).toFixed(10),
       );
-      const subTotal = parseFloat((unitValue * item.quantity).toFixed(10));
+
+      // Check if item is affected by IGV
+      if (item.afectacion_igv === 1) {
+        const igvTotal = parseFloat( // IGV 15,25
+            ((item.unitPrice / exchangeRate - unitValue) * item.quantity).toFixed(
+                10,
+            ),
+        );
+        const subTotal = parseFloat( // UNIT 84,71
+            (unitValue * item.quantity).toFixed(10)
+        );
+
+        sumTotalBase += subTotal;
+        sumTotalIgv += igvTotal;
+      }
+
       const total = parseFloat(
         ((item.unitPrice / exchangeRate) * item.quantity).toFixed(10),
       );
 
       sumTotal += total;
-      sumTotalBase += subTotal;
-      sumTotalIgv += igvTotal;
+
+      // Check if item is EXONERADA
+      if (item.afectacion_igv === 2) {
+        sumTotalExonerada += total;
+      }
+
+      // Check if item is INAFECTA
+      if (item.afectacion_igv === 3) {
+        sumTotalInafecta += total;
+      }
 
       return {
         unidad_de_medida: item.unit,
         codigo: item.code,
         cantidad: item.quantity,
         descripcion: item.description,
-        tipo_de_igv: 1, // Gravado - Operación Onerosa
-        valor_unitario: unitValue,
+        tipo_de_igv: item.afectacion_igv === 1 ? 1 : (item.afectacion_igv === 2 ? 8 : 9) , // 1 = Gravado - Operación Onerosa | 8 = Exonerado - Operación Onerosa | 9 = Inafecto - Operación Onerosa
+        valor_unitario: item.afectacion_igv === 1 ? unitValue : item.unitPrice / exchangeRate,
         precio_unitario: item.unitPrice / exchangeRate,
-        igv: igvTotal,
-        subtotal: subTotal,
+        igv: item.afectacion_igv === 1 ? (item.unitPrice / exchangeRate - unitValue) * item.quantity : 0,
+        subtotal: item.afectacion_igv === 1 ? (unitValue * item.quantity) : (item.unitPrice / exchangeRate)*item.quantity,
         total,
       };
     });
@@ -180,6 +204,8 @@ export class SaveCreditNoteUseCase {
       sumTotal,
       sumTotalBase,
       sumTotalIgv,
+      sumTotalExonerada,
+      sumTotalInafecta,
     };
   }
 }

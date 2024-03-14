@@ -100,6 +100,8 @@ export class CreditNoteInNubefact {
     total: number,
     totalBase: number,
     totalIgv: number,
+    totalExonerada: number,
+    totalInafecto: number,
     items: IItemInNubefact[],
   ) {
     this.operacion = 'generar_comprobante';
@@ -121,6 +123,8 @@ export class CreditNoteInNubefact {
     this.total = total;
     this.total_igv = totalIgv;
     this.total_gravada = totalBase;
+    this.total_exonerada = totalExonerada;
+    this.total_inafecta = totalInafecto,
     this.items = items;
     this.formato_de_pdf = 'A4';
   }
