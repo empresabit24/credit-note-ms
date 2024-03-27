@@ -79,12 +79,12 @@ class DocumentToChangeDTO {
   @ApiProperty({ required: true })
   @IsNumber()
   @IsNotEmpty()
-  tipo_cambio: number;
+  exchangeRate: number;
 
   @ApiProperty({ required: true })
   @IsNumber()
   @IsNotEmpty()
-  moneda: number;
+  currency: number;
 
 }
 

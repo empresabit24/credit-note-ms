@@ -27,15 +27,15 @@ export class SaveCreditNoteUseCase {
       this.logger.log('Obtiene el correlativo para la nota de crédito');
       const correlative = await this.getCorrelative();
 
-      const tipo_cambio = data.documentToChange.tipo_cambio;
-      this.logger.log('Obtiene el tipo de cambio ' + tipo_cambio);
+      const exchangeRate = data.documentToChange.exchangeRate;
+      this.logger.log('Obtiene el tipo de cambio ' + exchangeRate);
 
-      const moneda = data.documentToChange.moneda;
-      this.logger.log('Obtiene la moneda' + moneda);
+      const currency = data.documentToChange.currency;
+      this.logger.log('Obtiene la moneda' + currency);
 
       this.logger.log('Obtiene los items mapeados');
       const { items, sumTotal, sumTotalBase, sumTotalIgv, sumTotalExonerada, sumTotalInafecta } =
-        this.getMappedItemsAndTotals(data.items, tipo_cambio);
+        this.getMappedItemsAndTotals(data.items, exchangeRate);
 
       const date = moment().utcOffset(-5).format('DD-MM-YYYY');
 
@@ -62,7 +62,7 @@ export class SaveCreditNoteUseCase {
         correlative,
         currentDocument: JSON.stringify(currentDocument),
         type: JSON.stringify(type),
-        tipo_cambio,
+        exchangeRate: exchangeRate,
       });
 
       this.logger.log(
@@ -80,8 +80,8 @@ export class SaveCreditNoteUseCase {
         data.documentToChange.typeId,
         data.documentToChange.correlative,
         data.documentToChange.series,
-        moneda,
-        tipo_cambio,
+        currency,
+        exchangeRate,
         sumTotal,
         sumTotalBase,
         sumTotalIgv,
