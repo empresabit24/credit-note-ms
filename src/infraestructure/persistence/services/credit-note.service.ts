@@ -16,7 +16,7 @@ export class CreditNoteService {
     correlative: string;
     currentDocument: string;
     type: string;
-    exchangeRate: number;
+    tipo_cambio: number;
     linkPdf?: string;
   }): Promise<CreditNote> {
     return this.creditNoteModel.create(creditNote);

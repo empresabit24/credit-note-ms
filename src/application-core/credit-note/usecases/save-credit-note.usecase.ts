@@ -62,7 +62,7 @@ export class SaveCreditNoteUseCase {
         correlative,
         currentDocument: JSON.stringify(currentDocument),
         type: JSON.stringify(type),
-        exchangeRate: exchangeRate,
+        tipo_cambio: exchangeRate,
       });
 
       this.logger.log(
