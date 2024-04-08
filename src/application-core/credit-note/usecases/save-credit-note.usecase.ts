@@ -3,8 +3,11 @@ import { CreditNoteService } from '../../../infraestructure/persistence/services
 import { CreateCreditNoteDTO } from '../dto/create-credit-note.dto';
 import { FeProviderNubefactLocalService } from '../../../infraestructure/persistence/services/fe-provider-nubefact-local.service';
 import { NubefactClient } from '../../../infraestructure/microservice-clients/http/nubefact.client';
-import { CreditNoteInNubefact } from 'src/infraestructure/microservice-clients/http/interfaces/credit-note-in-nubefact';
+import { CreditNoteInNubefact } from '../../../infraestructure/microservice-clients/http/interfaces/credit-note-in-nubefact';
 import * as moment from 'moment';
+import { ParameterService } from '../../../infraestructure/persistence/services/parameter.service';
+import { ResetStockItemsCreditNoteUseCase } from '../usecases/reset-stock-items-credit-note.usecase';
+require('dotenv').config({ path: '.env.local' });
 
 @Injectable()
 export class SaveCreditNoteUseCase {
@@ -13,11 +16,25 @@ export class SaveCreditNoteUseCase {
   constructor(
     private readonly creditNoteService: CreditNoteService,
     private readonly feProviderNubefactLocalService: FeProviderNubefactLocalService,
+    private readonly parameterService: ParameterService,
     private readonly nubefactClient: NubefactClient,
+    private readonly resetStockItemsCreditNoteUseCase: ResetStockItemsCreditNoteUseCase,
   ) {}
   async execute(data: CreateCreditNoteDTO) {
-    this.logger.log(data);
     try {
+      const limitDays = await this.parameterService.findByName(
+        process.env.VARIABLE_NAME_CREDIT_NOTE_LIMIT,
+      );
+      const start = moment(data.documentToChange.dateOfIssue, 'YYYY-MM-DD');
+      const end = moment().format('YYYY-MM-DD');
+
+      const days = moment.duration(start.diff(end)).asDays() * -1;
+
+      if (Number(days) > Number(limitDays.valor))
+        throw new Error(
+          'Ha excedido los días límite permitidos para crear la Nota de Crédito.',
+        );
+
       this.logger.log(
         'Busca el proveedor para nubefact por idlocal: ' + data.idLocal,
       );
@@ -99,12 +116,23 @@ export class SaveCreditNoteUseCase {
           creditNoteInNubefactPayload,
         );
 
-      console.log(createCreditNote, nubefactClientResponse);
-
       await this.creditNoteService.updateLinkPdfById(
         nubefactClientResponse.data.enlace_del_pdf,
         createCreditNote?.dataValues?.id,
       );
+
+      this.logger.log('Resetea stocks de los items');
+      for await (const item of data.items) {
+        try {
+          await this.resetStockItemsCreditNoteUseCase.execute(
+            Number(data.idLocal),
+            Number(item.code),
+            item.quantity,
+          );
+        } catch (error) {
+          console.log(error);
+        }
+      }
 
       this.logger.log('Creó con éxito la nota de crédito');
       return {
@@ -115,9 +143,10 @@ export class SaveCreditNoteUseCase {
       };
     } catch (error) {
       this.logger.error('Sucedió un error');
+      this.logger.error(error)
       return {
         success: false,
-        message: 'Error to create a new credit note!',
+        message: error?.message || 'Error to create a new credit note!',
         code: error.response?.data?.codigo || error.code,
         response: error.response?.data?.errors || error,
         httpStatus: HttpStatus.BAD_REQUEST,
@@ -187,7 +216,7 @@ export class SaveCreditNoteUseCase {
 
       return {
         unidad_de_medida: item.unit,
-        codigo: item.code,
+        codigo: item.sku,
         cantidad: item.quantity,
         descripcion: item.description,
         tipo_de_igv: item.afectacion_igv === 1 ? 1 : (item.afectacion_igv === 2 ? 8 : 9) , // 1 = Gravado - Operación Onerosa | 8 = Exonerado - Operación Onerosa | 9 = Inafecto - Operación Onerosa
