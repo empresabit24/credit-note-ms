@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreditNote } from '../models/credit-note.model';
 import { CreateCreditNoteDTO } from 'src/application-core/credit-note/dto/create-credit-note.dto';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class CreditNoteService {
@@ -26,10 +27,16 @@ export class CreditNoteService {
     return this.creditNoteModel.update({ linkPdf }, { where: { id } });
   }
 
-  async getLast(): Promise<CreditNote[]> {
+  async getLast(isFactura: boolean): Promise<CreditNote[]> {
+    let series = isFactura ? 'F' : 'B';
     return this.creditNoteModel.findAll({
       limit: 1,
-      order: [['createdAt', 'DESC']],
+      order: [['correlative', 'DESC']],
+      where: {
+        series: {
+          [Op.like]: `%${series}%`
+        }
+      }
     });
   }
 

@@ -42,7 +42,7 @@ export class SaveCreditNoteUseCase {
         await this.feProviderNubefactLocalService.findByLocal(data.idLocal);
 
       this.logger.log('Obtiene el correlativo para la nota de crédito');
-      const correlative = await this.getCorrelative();
+      const correlative = await this.getCorrelative(data.documentToChange.series);
 
       const exchangeRate = data.documentToChange.exchangeRate;
       this.logger.log('Obtiene el tipo de cambio ' + exchangeRate);
@@ -154,8 +154,9 @@ export class SaveCreditNoteUseCase {
     }
   }
 
-  async getCorrelative(): Promise<string> {
-    const creditNotesResponse = await this.creditNoteService.getLast();
+  async getCorrelative(documentType: string ): Promise<string> {
+    let isFactura = documentType.includes('F') ? true : false;
+    const creditNotesResponse = await this.creditNoteService.getLast(isFactura);
     if (creditNotesResponse.length === 0) return String(1);
     return String(Number(creditNotesResponse[0].correlative) + 1);
   }

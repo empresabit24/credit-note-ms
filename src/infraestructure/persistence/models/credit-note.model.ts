@@ -19,7 +19,7 @@ export class CreditNote extends Model<CreditNote> {
   @Column({ allowNull: false })
   series: string;
 
-  @Column({ allowNull: false, unique: true })
+  @Column({ allowNull: false })
   correlative: string;
 
   @Column({ allowNull: false })
