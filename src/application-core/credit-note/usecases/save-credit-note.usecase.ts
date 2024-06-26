@@ -7,6 +7,7 @@ import { CreditNoteInNubefact } from '../../../infraestructure/microservice-clie
 import * as moment from 'moment';
 import { ParameterService } from '../../../infraestructure/persistence/services/parameter.service';
 import { ResetStockItemsCreditNoteUseCase } from '../usecases/reset-stock-items-credit-note.usecase';
+import {DocumentoVentaService} from "../../../infraestructure/persistence/services/documento-venta.service";
 require('dotenv').config({ path: '.env.local' });
 
 @Injectable()
@@ -19,6 +20,7 @@ export class SaveCreditNoteUseCase {
     private readonly parameterService: ParameterService,
     private readonly nubefactClient: NubefactClient,
     private readonly resetStockItemsCreditNoteUseCase: ResetStockItemsCreditNoteUseCase,
+    private readonly documentoVentaService: DocumentoVentaService
   ) {}
   async execute(data: CreateCreditNoteDTO) {
     try {
@@ -130,10 +132,22 @@ export class SaveCreditNoteUseCase {
             item.quantity,
           );
         } catch (error) {
-          console.log(error);
+          this.logger.error(error)
         }
       }
 
+      // Actualizar estado del documento de venta
+      try {
+        const serie = data.documentToChange.series;
+        const correlative = data.documentToChange.correlative.toString()
+
+        await this.documentoVentaService.updateDocumentoVentaState(serie, correlative)
+
+        this.logger.log('Se actualizó el estado del documento de venta');
+      } catch (error) {
+       this.logger.error(error)
+      }
+      
       this.logger.log('Creó con éxito la nota de crédito');
       return {
         success: true,

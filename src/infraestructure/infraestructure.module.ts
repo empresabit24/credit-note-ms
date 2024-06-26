@@ -16,6 +16,8 @@ import { StockProductLocalService } from './persistence/services/stock-product-l
 import { StockProductLocal } from './persistence/models/stock-product-local.model';
 import { StoreService } from './persistence/services/store.service';
 import { Store } from './persistence/models/store.model';
+import { DocumentoVentaService } from "./persistence/services/documento-venta.service";
+import {DocumentosVentaModel} from "./persistence/models/documentosventa.model";
 
 @Module({
   imports: [
@@ -34,6 +36,7 @@ import { Store } from './persistence/models/store.model';
     }),
     SequelizeModule.forFeature([
       CreditNote,
+      DocumentosVentaModel,
       FeProviderNubefactLocal,
       Parameter,
       ProductLocal,
@@ -43,6 +46,7 @@ import { Store } from './persistence/models/store.model';
   ],
   providers: [
     CreditNoteService,
+    DocumentoVentaService,
     FeProviderNubefactLocalService,
     ParameterService,
     ProductLocalService,
@@ -52,6 +56,7 @@ import { Store } from './persistence/models/store.model';
   ],
   exports: [
     CreditNoteService,
+    DocumentoVentaService,
     FeProviderNubefactLocalService,
     ParameterService,
     ProductLocalService,
