@@ -15,7 +15,7 @@ export class DocumentoVentaService {
   ): Promise<any> {
     try {
       const result = await this.documentoVentaModel.update(
-        { idestado: 10 }, // Cambiar el estado a 'Anulado'
+        { idestado: 15 }, // Cambiar el estado a 'Anulado - Dado de baja (Nota de Crédito)'
         {
           where: {
             serie: serie,

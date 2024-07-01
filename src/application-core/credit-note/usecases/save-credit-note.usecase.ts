@@ -136,14 +136,16 @@ export class SaveCreditNoteUseCase {
         }
       }
 
-      // Actualizar estado del documento de venta
+      // Actualizar estado del documento si el tipo de NC es 'anulación de la operación'
       try {
-        const serie = data.documentToChange.series;
-        const correlative = data.documentToChange.correlative.toString()
+        if(Number(data.creditNoteType) === 1) {
+          const serie = data.documentToChange.series;
+          const correlative = data.documentToChange.correlative.toString()
 
-        await this.documentoVentaService.updateDocumentoVentaState(serie, correlative)
+          await this.documentoVentaService.updateDocumentoVentaState(serie, correlative)
 
-        this.logger.log('Se actualizó el estado del documento de venta');
+          this.logger.log('Se actualizó el estado del documento de venta');
+        }
       } catch (error) {
        this.logger.error(error)
       }
